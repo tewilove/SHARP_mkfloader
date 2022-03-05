@@ -349,8 +349,29 @@ static uint32_t fldr_jump(int machine, unsigned long from, unsigned long to)
     return -1;
 }
 
+static int fldr_jump_to(int machine, void *insn, unsigned long addr)
+{
+    switch (machine) {
+    case EM_AARCH64: {
+        *((uint32_t *)(insn)) = 0x58000050;
+        *((uint32_t *)(insn + 4)) = 0xd61f0200;
+        *((unsigned long *)(insn + 8)) = addr;
+        return 0;
+    }
+    case EM_ARM: {
+        // ldr pc, [pc, #-4]
+        *((uint32_t *)(insn)) = 0xe51ff004;
+        *((unsigned long *)(insn + 4)) = addr;
+        return 0;
+    }
+    default:
+        return -1;
+    }
+    return -1;
+}
+
 static int mkfloader(const unsigned char *data, size_t size,
-        const struct fldr_device_info *device, unsigned char *iv,
+        const struct fldr_device_info *device, unsigned char *iv, unsigned long entry,
         unsigned char **out_data, size_t *out_size)
 {
     int i;
@@ -394,8 +415,12 @@ static int mkfloader(const unsigned char *data, size_t size,
         buff[i] = g_sec_msk[i] ^ iv[i];
     // AESed DATA
     buff = *out_data + 0x10;
-    // head: jump to + 0x800, to simplify our customized loader
-    *((uint32_t *)(buff + device->entry)) = fldr_jump(device->machine, device->entry, 0x800);
+    // head: jump to + 0x600, to simplify our customized loader
+    if (!entry) {
+        *((uint32_t *)(buff + device->entry)) = fldr_jump(device->machine, device->entry, 0x600);
+    } else {
+        fldr_jump_to(device->machine, buff + device->entry, entry);
+    }
     // head: name
     memcpy(buff + 0x400, device->name, 4);
     // head: + 0x200, swap 6 dword, using all same value to simplify check
@@ -449,9 +474,10 @@ int main(int argc, char *argv[])
     size_t isize = 0, osize = 0;
     unsigned char *idata = NULL, *odata = NULL;
     unsigned char iv[16] = { 0 };
+    unsigned long entry = 0;
     const struct fldr_device_info *info = NULL;
 
-    while ((ch = getopt(argc, argv, "hd:i:o:v:")) != -1) {
+    while ((ch = getopt(argc, argv, "hd:i:o:v:e:")) != -1) {
         switch (ch) {
         case 'd': {
             device = optarg;
@@ -487,6 +513,10 @@ int main(int argc, char *argv[])
             }
             break;
         }
+        case 'e': {
+            entry = strtol(optarg, NULL, 16);
+            break;
+        }
         case 'h':
         default: {
 fail_usage:
@@ -511,7 +541,7 @@ fail_usage:
     rc = file_read(ifile, &idata, &isize);
     if (rc || !idata || !isize)
         goto fail_file_read;
-    rc = mkfloader(idata, isize, info, iv, &odata, &osize);
+    rc = mkfloader(idata, isize, info, iv, entry, &odata, &osize);
     if (rc)
         goto fail_mkfloader;
     rc = file_write(ofile, odata, osize);
