@@ -101,17 +101,23 @@ const static unsigned char g_sht21_key[] = {
 };
 
 const static struct fldr_device_info g_devices[] = {
+    // SBM
+    { .name = { 'P', 'A', '1', '7', }, .model = "204SH",  .key = g_204sh_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'P', 'A', '2', '1', }, .model = "302SH",  .key = g_302sh_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'P', 'A', '2', '3', }, .model = "303SH",  .key = g_303sh_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'P', 'A', '2', '4', }, .model = "304SH",  .key = g_304sh_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'P', 'B', '2', '5', }, .model = "306SH",  .key = g_306sh_key, .machine = EM_ARM, .entry = 0x50, },
+    { .name = { 'P', 'A', '2', '6', }, .model = "402SH",  .key = g_402sh_key, .machine = EM_ARM, .entry = 0x50, },
+    // DCM
     { .name = { 'D', 'L', '4', '0', }, .model = "SH-01F", .key = g_sh01f_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'D', 'L', '5', '0', }, .model = "SH-04F", .key = g_sh04f_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'D', 'L', '6', '0', }, .model = "SH-01G", .key = g_sh01g_key, .machine = EM_ARM, .entry = 0x50, },
+    // KDI
     { .name = { 'A', 'S', '9', '7', }, .model = "SHL23",  .key = g_shl23_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'A', 'S', '8', '7', }, .model = "SHL24",  .key = g_shl24_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'A', 'S', '9', '9', }, .model = "SHL25",  .key = g_shl25_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'A', 'L', '1', '5', }, .model = "SHV31",  .key = g_shv31_key, .machine = EM_ARM, .entry = 0x50, },
+    { .name = { 'A', 'F', '1', '0', }, .model = "SHF31",  .key = g_shf31_key, .machine = EM_ARM, .entry = 0x50, },
     { .name = { 'G', 'P', '4',      }, .model = "SHT21",  .key = g_sht21_key, .machine = EM_ARM, .entry = 0x28, },
 };
 
